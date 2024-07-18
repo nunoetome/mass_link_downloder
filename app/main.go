@@ -93,7 +93,7 @@ func main() {
 	var linkListFileFolder string = "C:\\Users\\nunot\\Documents\\_Documentos\\Projectos\\mass link downloder\\repositorio\\app"
 	linkListFile := linkListFileFolder + "\\" + linkListFileName
 
-	var downloadFolder string = "C:\\Users\\nunot\\Documents\\_Documentos\\Projectos\\mass link downloder\\repositorio\\app\\files"
+	var downloadFolder string = "C:\\Users\\nunot\\Documents\\_Documentos\\Projectos\\mass link downloder\\repositorio\\app\\downloaded_files"
 
 	//config file defenition
 	/*var configFileFileName string = "configFileFileName"
