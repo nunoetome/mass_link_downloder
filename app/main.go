@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -23,11 +24,31 @@ func initConfig() {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 }
+func initSlog() {
+
+	slog.SetLogLoggerLevel(slog.LevelDebug)
+	//change the slog output to file
+
+	// Open a file for logging
+	logFile, err := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+
+	log.SetOutput(logFile)
+	//change the slog output tconsole
+	//slog.SetOutputConsole(true)
+
+}
 
 // loadLinksFromFile lê um ficheiro de texto que contém uma lista de links e retorna uma slice de strings com esses links
 func loadLinksFromFile(filePath string) ([]string, error) {
+
+	slog.Debug("---- inicio loadLinksFromFile ----")
+
 	file, err := os.Open(filePath)
 	if err != nil {
+		slog.Error("erro ao abrir o ficheiro: %v", err)
 		return nil, fmt.Errorf("erro ao abrir o ficheiro: %v", err)
 	}
 	defer file.Close()
@@ -36,94 +57,113 @@ func loadLinksFromFile(filePath string) ([]string, error) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
+		slog.Debug("linha do ficheiro: " + line)
 		if line != "" {
 			links = append(links, line)
+			slog.Debug("link a ser carregado: " + line)
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
+		slog.Error("erro ao ler o ficheiro: %v", err)
 		return nil, fmt.Errorf("erro ao ler o ficheiro: %v", err)
 	}
 
+	slog.Debug("---- fim loadLinksFromFile ----")
 	return links, nil
 }
 
 // downloadFile faz o download do conteúdo de um link e salva-o num ficheiro local
 func downloadFile(url, folderPath string) error {
+
+	slog.Debug("---- inicio downloadFile ----")
+
 	// Obter o nome do ficheiro a partir da URL
 	parts := strings.Split(url, "/")
 	fileName := parts[len(parts)-1]
 	filePath := filepath.Join(folderPath, fileName)
+	slog.Debug("filePath: " + filePath)
 
 	// Fazer o pedido HTTP
 	resp, err := http.Get(url)
 	if err != nil {
+		slog.Error("erro ao fazer o pedido HTTP: %v", err)
 		return fmt.Errorf("erro ao fazer o pedido HTTP: %v", err)
+	} else {
+		slog.Debug("pedido HTTP feito: " + url)
 	}
 	defer resp.Body.Close()
 
 	// Criar o ficheiro local
 	outFile, err := os.Create(filePath)
 	if err != nil {
+		slog.Error("erro ao criar o ficheiro: %v", err)
 		return fmt.Errorf("erro ao criar o ficheiro: %v", err)
+	} else {
+		slog.Debug("ficheiro criado: " + filePath)
+
 	}
+
 	defer outFile.Close()
 
 	// Copiar o conteúdo da resposta HTTP para o ficheiro local
 	_, err = io.Copy(outFile, resp.Body)
 	if err != nil {
+		slog.Error("erro ao copiar o conteúdo: %v", err)
 		return fmt.Errorf("erro ao copiar o conteúdo: %v", err)
 	}
 
+	slog.Debug("---- fim downloadFile ----")
 	return nil
 }
 
 // downloadLinks faz o download de todos os links para uma pasta especificada
 func downloadLinks(links []string, folderPath string) error {
+
+	slog.Debug("---- inicio downloadLinks ----")
+
 	for _, link := range links {
 		//fmt.Printf("A fazer download de %s...\n", link)
 		err := downloadFile(link, folderPath)
 		if err != nil {
+			slog.Error("Erro ao fazer download de %s: %v\n", link, err)
 			fmt.Printf("Erro ao fazer download de %s: %v\n", link, err)
 		} else {
-			//fmt.Printf("Download de %s concluído.\n", link)
+			slog.Debug("Download de %s concluído.\n", link)
 		}
 	}
+	slog.Debug("---- fim downloadLinks ----")
 	return nil
 }
+
 func main() {
-	//#TODO: create a fun to set debug from confige file
 
-	slog.SetLogLoggerLevel(slog.LevelInfo)
-
-	slog.Info("Wellcame to Mass Link Downloder")
+	initSlog()
+	fmt.Println("Wellcame to Mass Link Downloder")
+	slog.Info("---------------------------------")
 	slog.Info("Program Started")
-	slog.Info("lvl.Set(slog.LevelDebug)")
-	slog.Info("The program is running in slog in")
+	slog.Info("---------------------------------")
 
 	initConfig()
 
 	slog.Debug("Config file loaded")
 
+	//define the o ficheiro de links
 	linkListFile := filepath.Join(viper.GetString("linkListFileFolder"), viper.GetString("linkListFile"))
-	//fmt.Println("linkListFile", linkListFile)
-	downloadFolder := viper.GetString("downloadFolder")
-	//fmt.Println("linkListFile", linkListFile)
+	slog.Debug("linkListFile: " + linkListFile)
 
-	fmt.Println("2 config loaded")
+	//define the download folder
+	downloadFolder := viper.GetString("downloadFolder")
+	slog.Debug("downloadFolder: " + downloadFolder)
+
+	slog.Debug("config data loaded")
 
 	links, err := loadLinksFromFile(linkListFile)
 	if err != nil {
+		slog.Error("Erro: %v\n", err)
 		fmt.Printf("Erro: %v\n", err)
 		return
 	}
-
-	//fmt.Println("3")
-	//#DEBUG
-	//fmt.Println("Loaded links:")
-	//for _, link := range links {
-	//	fmt.Println(link)
-	//}
 
 	// Criar a pasta de downloads se não existir
 	if _, err := os.Stat(downloadFolder); os.IsNotExist(err) {
@@ -137,5 +177,7 @@ func main() {
 	} else {
 		fmt.Println("Todos os downloads foram concluídos.")
 	}
+
+	slog.Info("Program Ended")
 
 }
