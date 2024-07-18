@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -11,10 +12,6 @@ import (
 
 	"github.com/spf13/viper"
 )
-
-var SYS_COMFIG_LINK_LIST = []string{}
-var SYS_COMFIG_DESTINATION_FOLDER string
-var SYS_COMFIG_DEBUG_MODE bool = true
 
 func initConfig() {
 	viper.SetConfigName("config")
@@ -84,25 +81,34 @@ func downloadFile(url, folderPath string) error {
 // downloadLinks faz o download de todos os links para uma pasta especificada
 func downloadLinks(links []string, folderPath string) error {
 	for _, link := range links {
-		fmt.Printf("A fazer download de %s...\n", link)
+		//fmt.Printf("A fazer download de %s...\n", link)
 		err := downloadFile(link, folderPath)
 		if err != nil {
 			fmt.Printf("Erro ao fazer download de %s: %v\n", link, err)
 		} else {
-			fmt.Printf("Download de %s concluído.\n", link)
+			//fmt.Printf("Download de %s concluído.\n", link)
 		}
 	}
 	return nil
 }
 func main() {
+	//#TODO: create a fun to set debug from confige file
 
-	//fmt.Println("1 start")
+	slog.SetLogLoggerLevel(slog.LevelInfo)
+
+	slog.Info("Wellcame to Mass Link Downloder")
+	slog.Info("Program Started")
+	slog.Info("lvl.Set(slog.LevelDebug)")
+	slog.Info("The program is running in slog in")
+
 	initConfig()
 
+	slog.Debug("Config file loaded")
+
 	linkListFile := filepath.Join(viper.GetString("linkListFileFolder"), viper.GetString("linkListFile"))
-	fmt.Println("linkListFile", linkListFile)
+	//fmt.Println("linkListFile", linkListFile)
 	downloadFolder := viper.GetString("downloadFolder")
-	fmt.Println("linkListFile", linkListFile)
+	//fmt.Println("linkListFile", linkListFile)
 
 	fmt.Println("2 config loaded")
 
@@ -112,12 +118,12 @@ func main() {
 		return
 	}
 
-	fmt.Println("3")
+	//fmt.Println("3")
 	//#DEBUG
-	fmt.Println("Loaded links:")
-	for _, link := range links {
-		fmt.Println(link)
-	}
+	//fmt.Println("Loaded links:")
+	//for _, link := range links {
+	//	fmt.Println(link)
+	//}
 
 	// Criar a pasta de downloads se não existir
 	if _, err := os.Stat(downloadFolder); os.IsNotExist(err) {
