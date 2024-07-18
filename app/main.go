@@ -95,18 +95,8 @@ func downloadLinks(links []string, folderPath string) error {
 }
 func main() {
 
-	//var linkListFile string = ""
-	var linkListFileName string = "linkListFileName.txt"
-	var linkListFileFolder string = "C:\\Users\\nunot\\Documents\\_Documentos\\Projectos\\mass link downloder\\repositorio\\app"
-	linkListFile := linkListFileFolder + "\\" + linkListFileName
-
-	var downloadFolder string = "C:\\Users\\nunot\\Documents\\_Documentos\\Projectos\\mass link downloder\\repositorio\\app\\downloaded_files"
-
-	//config file defenition
-	/*var configFileFileName string = "configFileFileName"
-	var configFileFileFolder string = "C:\\Users\\nunot\\Documents\\_Documentos\\Projectos\\mass link downloder\\repositorio\\app\\files"
-	configFile := configFileFileName + "\\" + configFileFileFolder
-	*/
+	linkListFile := filepath.Join(viper.GetString("linkListFileFolder"), viper.GetString("linkListFile"))
+	downloadFolder := viper.GetString("downloadFolder")
 
 	links, err := loadLinksFromFile(linkListFile)
 	if err != nil {
