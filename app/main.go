@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -11,10 +12,6 @@ import (
 
 	"github.com/spf13/viper"
 )
-
-var SYS_COMFIG_LINK_LIST = []string{}
-var SYS_COMFIG_DESTINATION_FOLDER string
-var SYS_COMFIG_DEBUG_MODE bool = true
 
 func initConfig() {
 	viper.SetConfigName("config")
@@ -96,8 +93,9 @@ func downloadLinks(links []string, folderPath string) error {
 }
 func main() {
 
-	//fmt.Println("1 start")
+	slog.Info("Program Started")
 	initConfig()
+	slog.Debug("Config file loaded")
 
 	linkListFile := filepath.Join(viper.GetString("linkListFileFolder"), viper.GetString("linkListFile"))
 	fmt.Println("linkListFile", linkListFile)
@@ -114,10 +112,10 @@ func main() {
 
 	fmt.Println("3")
 	//#DEBUG
-	fmt.Println("Loaded links:")
-	for _, link := range links {
-		fmt.Println(link)
-	}
+	//fmt.Println("Loaded links:")
+	//for _, link := range links {
+	//	fmt.Println(link)
+	//}
 
 	// Criar a pasta de downloads se não existir
 	if _, err := os.Stat(downloadFolder); os.IsNotExist(err) {
