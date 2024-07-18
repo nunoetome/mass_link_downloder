@@ -20,6 +20,7 @@ func initConfig() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
+	//fmt.Printf("viper")
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
@@ -95,8 +96,15 @@ func downloadLinks(links []string, folderPath string) error {
 }
 func main() {
 
+	//fmt.Println("1 start")
+	initConfig()
+
 	linkListFile := filepath.Join(viper.GetString("linkListFileFolder"), viper.GetString("linkListFile"))
+	fmt.Println("linkListFile", linkListFile)
 	downloadFolder := viper.GetString("downloadFolder")
+	fmt.Println("linkListFile", linkListFile)
+
+	fmt.Println("2 config loaded")
 
 	links, err := loadLinksFromFile(linkListFile)
 	if err != nil {
@@ -104,6 +112,7 @@ func main() {
 		return
 	}
 
+	fmt.Println("3")
 	//#DEBUG
 	fmt.Println("Loaded links:")
 	for _, link := range links {
