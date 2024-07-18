@@ -8,15 +8,22 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 var SYS_COMFIG_LINK_LIST = []string{}
 var SYS_COMFIG_DESTINATION_FOLDER string
 var SYS_COMFIG_DEBUG_MODE bool = true
 
-// download
-func download(link2Download string) {
-
+func initConfig() {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
 }
 
 // loadLinksFromFile lê um ficheiro de texto que contém uma lista de links e retorna uma slice de strings com esses links
@@ -88,18 +95,8 @@ func downloadLinks(links []string, folderPath string) error {
 }
 func main() {
 
-	//var linkListFile string = ""
-	var linkListFileName string = "linkListFileName.txt"
-	var linkListFileFolder string = "C:\\Users\\nunot\\Documents\\_Documentos\\Projectos\\mass link downloder\\repositorio\\app"
-	linkListFile := linkListFileFolder + "\\" + linkListFileName
-
-	var downloadFolder string = "C:\\Users\\nunot\\Documents\\_Documentos\\Projectos\\mass link downloder\\repositorio\\app\\downloaded_files"
-
-	//config file defenition
-	/*var configFileFileName string = "configFileFileName"
-	var configFileFileFolder string = "C:\\Users\\nunot\\Documents\\_Documentos\\Projectos\\mass link downloder\\repositorio\\app\\files"
-	configFile := configFileFileName + "\\" + configFileFileFolder
-	*/
+	linkListFile := filepath.Join(viper.GetString("linkListFileFolder"), viper.GetString("linkListFile"))
+	downloadFolder := viper.GetString("downloadFolder")
 
 	links, err := loadLinksFromFile(linkListFile)
 	if err != nil {
@@ -127,30 +124,3 @@ func main() {
 	}
 
 }
-
-/*
-func main() {
-
-	//var linkListFile string = ""
-	var linkListFileName string = "linkListFileName.txt"
-	var linkListFileFolder string = "C:\\Users\\nunot\\Documents\\_Documentos\\Projectos\\mass link downloder\\repositorio\\app"
-	linkListFile := linkListFileFolder + "\\" + linkListFileFolder
-
-	//var configFile string = ""
-	var configFileFileName string = "configFileFileName"
-	var configFileFileFolder string = "C:\\Users\\nunot\\Documents\\_Documentos\\Projectos\\mass link downloder\\repositorio\\app"
-	configFile := configFileFileName + "\\" + configFileFileFolder
-
-	fmt.Println(linkListFile)
-	fmt.Println(linkListFileName)
-	fmt.Println(linkListFileFolder)
-	fmt.Println(linkList)
-
-	fmt.Println(configFile)
-	fmt.Println(configFileFileName)
-	fmt.Println(configFileFileFolder)
-
-	load_link_list_from_file(linkListFile)
-
-}
-*/
