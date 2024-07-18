@@ -89,19 +89,27 @@ func downloadFile(url, folderPath string) error {
 	if err != nil {
 		slog.Error("erro ao fazer o pedido HTTP: %v", err)
 		return fmt.Errorf("erro ao fazer o pedido HTTP: %v", err)
+	} else {
+		slog.Debug("pedido HTTP feito: " + url)
 	}
 	defer resp.Body.Close()
 
 	// Criar o ficheiro local
 	outFile, err := os.Create(filePath)
 	if err != nil {
+		slog.Error("erro ao criar o ficheiro: %v", err)
 		return fmt.Errorf("erro ao criar o ficheiro: %v", err)
+	} else {
+		slog.Debug("ficheiro criado: " + filePath)
+
 	}
+
 	defer outFile.Close()
 
 	// Copiar o conteúdo da resposta HTTP para o ficheiro local
 	_, err = io.Copy(outFile, resp.Body)
 	if err != nil {
+		slog.Error("erro ao copiar o conteúdo: %v", err)
 		return fmt.Errorf("erro ao copiar o conteúdo: %v", err)
 	}
 
@@ -111,17 +119,23 @@ func downloadFile(url, folderPath string) error {
 
 // downloadLinks faz o download de todos os links para uma pasta especificada
 func downloadLinks(links []string, folderPath string) error {
+
+	slog.Debug("---- inicio downloadLinks ----")
+
 	for _, link := range links {
 		//fmt.Printf("A fazer download de %s...\n", link)
 		err := downloadFile(link, folderPath)
 		if err != nil {
+			slog.Error("Erro ao fazer download de %s: %v\n", link, err)
 			fmt.Printf("Erro ao fazer download de %s: %v\n", link, err)
 		} else {
-			//fmt.Printf("Download de %s concluído.\n", link)
+			slog.Debug("Download de %s concluído.\n", link)
 		}
 	}
+	slog.Debug("---- fim downloadLinks ----")
 	return nil
 }
+
 func main() {
 
 	initSlog()
@@ -151,13 +165,6 @@ func main() {
 		return
 	}
 
-	//fmt.Println("3")
-	//#DEBUG
-	//fmt.Println("Loaded links:")
-	//for _, link := range links {
-	//	fmt.Println(link)
-	//
-
 	// Criar a pasta de downloads se não existir
 	if _, err := os.Stat(downloadFolder); os.IsNotExist(err) {
 		os.Mkdir(downloadFolder, 0755)
@@ -171,9 +178,6 @@ func main() {
 		fmt.Println("Todos os downloads foram concluídos.")
 	}
 
-	//close logFile
-	slog.Info("---------------------------------")
-	slog.Info("- 3 - %d", "Program Ended")
-	slog.Info("---------------------------------")
+	slog.Info("Program Ended")
 
 }
