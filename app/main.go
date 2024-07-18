@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -95,6 +96,18 @@ func main() {
 	//#TODO: create a fun to set debug from confige file
 
 	slog.SetLogLoggerLevel(slog.LevelInfo)
+	//change the slog output to file
+
+	// Open a file for logging
+	logFile, err := os.OpenFile("log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	//defer logFile.Close()
+
+	log.SetOutput(logFile)
+	//change the slog output tconsole
+	//slog.SetOutputConsole(true)
 
 	slog.Info("Wellcame to Mass Link Downloder")
 	slog.Info("Program Started")
@@ -123,7 +136,7 @@ func main() {
 	//fmt.Println("Loaded links:")
 	//for _, link := range links {
 	//	fmt.Println(link)
-	//}
+	//
 
 	// Criar a pasta de downloads se não existir
 	if _, err := os.Stat(downloadFolder); os.IsNotExist(err) {
